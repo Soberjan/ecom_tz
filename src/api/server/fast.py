@@ -1,0 +1,27 @@
+import inspect
+import os
+import sys
+current_dir = os.path.dirname(os.path.abspath(
+    inspect.getfile(inspect.currentframe())))  # type: ignore
+parent_dir = os.path.dirname(current_dir)  # type: ignore
+sys.path.insert(0, parent_dir)  # type: ignore
+sys.path.append("./src")
+
+from dotenv import load_dotenv
+load_dotenv()
+from fastapi import FastAPI
+
+from config import Config
+Config.init()
+from endpoints.analytical import *
+from endpoints.technical import technical_router
+from database.database import Database
+
+app = FastAPI()
+
+db = Database()
+db.connect()
+app.state.db = db
+
+app.include_router(analytical_router)
+app.include_router(technical_router)
